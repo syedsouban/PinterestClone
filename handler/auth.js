@@ -1,0 +1,44 @@
+const User =  require("../models/user");
+const bcrypt = require('bcrypt');
+
+exports.signup = async (req, res) => {
+	
+	const email = req.body.email;
+
+	User.findOne({email},function(err,user){	
+		if(err) return res.status(500).json({message:err.message});
+		else if(user) return res.status(403).json({"message":"User exists"});
+		
+		const password = req.body.password;
+		const name = req.body.name;
+
+		bcrypt.hash(password, 10)
+    	.then(async function(hashed_password) {
+        	const user = await new User({email,name,hashed_password});
+        	await user.save(function(err) {
+			if(!err) return res.json({message:"success"});
+				return res.status(500).send({ message: err.message });
+			});
+    	})
+    	.catch(function(error){
+        	res.status(500).send({message:error.message});
+    	});
+	});	
+};
+
+exports.login = (req,res) => {
+	const email = req.body.email;
+	const password = req.body.password;
+
+	User.findOne({email},function(err,user) {
+		if(err) return res.status(500).json({message:err.message});
+
+		if(!user) return res.status(403).json({"message":"User does not exists"});
+
+		bcrypt.compare(password,user.hashed_password,(err,result) => {
+			if(result) return res.status(200).json({"message":"success"});
+			else return res.status(403).json({message: "email address password do not match"});
+		});
+		
+	});
+};	

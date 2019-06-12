@@ -1,0 +1,27 @@
+const express = require("express");
+const app = express();
+const authRoutes=require('./routes/auth');
+const mongoose=require('mongoose');
+const bodyParser = require("body-parser");
+
+
+mongoose.connect('mongodb://localhost:27017/pinterestclone',{useNewUrlParser:true},function (err) {
+  if (err) throw err
+
+  console.log("Connected to local mongo db database");
+  
+
+});
+
+
+
+
+app.get("/",(req,res)=>console.log("A request was made to /"));
+
+app.use(bodyParser.json());
+app.use("/",authRoutes);
+
+const port = process.env.PORT||8080
+app.listen(port,()=> {
+	console.log("Hello world");
+})

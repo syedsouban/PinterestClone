@@ -1,0 +1,23 @@
+{
+  "name": "pinterest-clone",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "express": "^4.17.1",
+    "mongodb": "^3.2.7",
+    "mongoose": "^5.5.15"
+  },
+  "engines": {
+    "node": "10.15.3"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  }
+}
