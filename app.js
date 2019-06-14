@@ -3,18 +3,15 @@ const app = express();
 const authRoutes=require('./routes/auth');
 const mongoose=require('mongoose');
 const bodyParser = require("body-parser");
+require("dotenv").config();
 
 
-mongoose.connect('mongodb://localhost:27017/pinterestclone',{useNewUrlParser:true},function (err) {
-  if (err) throw err
-
-  console.log("Connected to local mongo db database");
+mongoose.connect(MONGO_URI,{useNewUrlParser:true},function (err) {
   
+  if (err) throw err
+  console.log("Connected to local mongo db database");
 
 });
-
-
-
 
 app.get("/",(req,res)=>console.log("A request was made to /"));
 
