@@ -3,7 +3,6 @@ const {
 	signup,login
 } = require("../handler/auth")
 
-
 const router = express.Router();
 
 router.post("/signup",signup);
