@@ -24,7 +24,7 @@ exports.signup = async (req, res) => {
 			if(!err) {
 
   				
-  				const resetURL = `http://${req.headers.host}/verifyemail/${user.resetPasswordToken}`;
+  				const resetURL = `http://${req.headers.host}/verifyemail/${user.emailVerificationToken}`;
 				const sgMail = require('@sendgrid/mail');
 				
 				sgMail.setApiKey(process.env.SENDGRID_API_KEY);	
