@@ -24,7 +24,7 @@ exports.signup = async (req, res) => {
 			if(!err) {
 
   				
-  				const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`;
+  				const resetURL = `http://${req.headers.host}/verifyemail/${user.resetPasswordToken}`;
 				const sgMail = require('@sendgrid/mail');
 				
 				sgMail.setApiKey(process.env.SENDGRID_API_KEY);	
@@ -56,10 +56,22 @@ exports.login = (req,res) => {
 
 		if(!user) return res.status(403).json({"message":"User does not exists"});
 
+		
 		bcrypt.compare(password,user.hashed_password,(err,result) => {
 			if(result) return res.status(200).json({"message":"success"});
 			else return res.status(403).json({message: "email address password do not match"});
 		});
 		
 	});
+};
+
+exports.verifyemail = async (req,res) => {
+	const emailVerificationToken = req.params.token;
+	const user = await User.findOneAndUpdate({emailVerificationToken},resetPasswordExpires: { $gt: Date.now() },{$set:{isVerified:true});
+	
+	if(!user) {
+		res.status(403).send({"message":"Password reset is invalid or has expired"});
+	}
+
+	res.status.send({"message":"email verification successful you can login now!"});
 };	
