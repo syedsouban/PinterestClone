@@ -15,6 +15,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    isVerified: {
+    	type:Boolean,
+    	default: false
+    },
+    emailVerificationToken: String,
+    emailVerificationTokenExpires: Date,
 	bio: String,
 	website: String
 });

@@ -14,9 +14,29 @@ exports.signup = async (req, res) => {
 
 		bcrypt.hash(password, 10)
     	.then(async function(hashed_password) {
+
         	const user = await new User({email,name,hashed_password});
         	await user.save(function(err) {
-			if(!err) return res.json({message:"success"});
+			
+			if(!err) {
+
+				user.emailVerificationToken = crypto.randomBytes(20).toString('hex');
+  				user.emailVerificationTokenExpires = Date.now() + 3600000; // 1 hour from now
+  				
+  				const resetURL = `http://${req.headers.host}/account/reset/${user.resetPasswordToken}`;
+				const sgMail = require('@sendgrid/mail');
+				
+				sgMail.setApiKey(process.env.SENDGRID_API_KEY);	
+				const msg = {
+  					from: 'admin@pinclone.com',
+  					to: email,
+  					subject: 'Email verification link',
+  					html: `Verify your email <a href="${resetURL}">here</a> to login to your account`,
+				};
+				sgMail.send(msg);
+
+				return res.json({message:"verify email address to login"});	
+			} 
 				return res.status(500).send({ message: err.message });
 			});
     	})
