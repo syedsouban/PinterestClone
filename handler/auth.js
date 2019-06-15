@@ -69,7 +69,7 @@ exports.verifyemail = async (req,res) => {
 	// const emailVerificationToken = req.params.token;
 	const user = await User.findOneAndUpdate({
     emailVerificationToken: req.params.token,
-    emailVerificationTokenExpires: { $gt: Date.now() }
+    // emailVerificationTokenExpires: { $gt: Date.now() }
   	},
   	{$set:{isVerified:true}}
   	)
