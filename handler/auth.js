@@ -74,7 +74,7 @@ exports.verifyemail = async (req,res) => {
   	{$set:{isVerified:true}}
   	)
 	.then(function(res){
-
+		console.log(res);
 	})
 	.catch(function(err){
 		res.status(500).send({message:err.message});
