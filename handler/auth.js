@@ -67,7 +67,7 @@ exports.login = (req,res) => {
 
 exports.verifyemail = async (req,res) => {
 	const emailVerificationToken = req.params.token;
-	const user = await User.findOneAndUpdate({emailVerificationToken:emailVerificationToken,resetPasswordExpires: { $gt: Date.now() }},{$set:{isVerified:true}});
+	const user = await User.findOneAndUpdate({emailVerificationToken:emailVerificationToken,{$set:{isVerified:true}});
 	
 	if(!user) {
 		res.status(403).send({"message":"Password reset is invalid or has expired"});
