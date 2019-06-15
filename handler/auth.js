@@ -66,9 +66,9 @@ exports.login = (req,res) => {
 };
 
 exports.verifyemail = async (req,res) => {
-	const emailVerificationToken = req.params.token;
+	// const emailVerificationToken = req.params.token;
 	const user = await User.findOneAndUpdate({
-    emailVerificationToken: emailVerificationToken,
+    emailVerificationToken: req.params.token,
     emailVerificationTokenExpires: { $gt: Date.now() }
   	},
   	{$set:{isVerified:true}}
