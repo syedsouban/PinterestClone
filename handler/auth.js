@@ -18,7 +18,7 @@ exports.signup = async (req, res) => {
 
         	const user = await new User({email,name,hashed_password});
 			user.emailVerificationToken = crypto.randomBytes(20).toString('hex');
-  			user.emailVerificationTokenExpires = Date.now() + 3600000; // 1 hour from now
+  			user.emailVerificationTokenExpires = Date.now() + 3600000*24; 
         	await user.save(function(err) {
 			
 			if(!err) {
@@ -56,9 +56,13 @@ exports.login = (req,res) => {
 
 		if(!user) return res.status(403).json({"message":"User does not exists"});
 
-		
 		bcrypt.compare(password,user.hashed_password,(err,result) => {
-			if(result) return res.status(200).json({"message":"success"});
+			if(result) {
+				if(user.isVerified)
+					return res.status(200).json({"message":"successfully logged in"});
+				else
+					return res.status(403).json({"message":"user is not verified"});
+			}
 			else return res.status(403).json({message: "email address password do not match"});
 		});
 		
@@ -66,23 +70,31 @@ exports.login = (req,res) => {
 };
 
 exports.verifyemail = async (req,res) => {
-	// const emailVerificationToken = req.params.token;
-	const user = await User.findOneAndUpdate({
-    emailVerificationToken: req.params.token,
-    // emailVerificationTokenExpires: { $gt: Date.now() }
-  	},
-  	{$set:{isVerified:true}}
-  	)
-	.then(function(res){
-		console.log(res);
-	})
-	.catch(function(err){
-		res.status(500).send({message:err.message});
-	});
 	
-	if(!user) {
-		res.status(403).send({"message":"Password reset is invalid or has expired"});
-	}
-
-	res.status.send({"message":"email verification successful you can login now!"});
+	User.findOneAndUpdate({emailVerificationToken: req.params.token,emailVerificationTokenExpires: { $gt: Date.now() }}, {$set:{isVerified:true}}, {new: true}, (err, user) => {
+    if (err) {
+    	res.status(403).send({message:"Link invalid or expired"});
+        // res.status(500).send({message:"Something wrong when updating data!"});
+    }
+    if(user) {
+		res.status(200).send({"message":"email verification successful you can login now!"});
+    }
+	});	
 };	
+
+exports.requiresLogin = (req, res, next) => {
+  if (req.session && req.session.userId) {
+    return next();
+  } else {
+    var err = new Error('You must be logged in to view this page.');
+    err.status = 401;
+    return next(err);
+  }
+}
+
+exports.getUsers = (req,res) => {
+	User.find({},function(err,users){
+		res.send(users);
+	});
+};
+
