@@ -2,6 +2,9 @@ const User =  require("../models/user");
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 
+const fs = require("fs");
+const jwt = require('jsonwebtoken');
+
 exports.signup = async (req, res) => {
 	
 	const email = req.body.email;
@@ -21,9 +24,7 @@ exports.signup = async (req, res) => {
   			user.emailVerificationTokenExpires = Date.now() + 3600000*24; 
         	await user.save(function(err) {
 			
-			if(!err) {
-
-  				
+			if(!err) {	
   				const resetURL = `http://${req.headers.host}/verifyemail/${user.emailVerificationToken}`;
 				const sgMail = require('@sendgrid/mail');
 				
@@ -47,7 +48,7 @@ exports.signup = async (req, res) => {
 	});	
 };
 
-exports.login = (req,res) => {
+exports.login =  (req,res) => {
 	const email = req.body.email;
 	const password = req.body.password;
 
@@ -56,10 +57,12 @@ exports.login = (req,res) => {
 
 		if(!user) return res.status(403).json({"message":"User does not exists"});
 
-		bcrypt.compare(password,user.hashed_password,(err,result) => {
+		bcrypt.compare(password,user.hashed_password, async (err,result) => {
 			if(result) {
-				if(user.isVerified)
-					return res.status(200).json({"message":"successfully logged in"});
+				if(user.isVerified) {
+					const token = await user.generateAuthToken();
+					return res.status(200).json({"message":"successfully logged in",token});
+				}
 				else
 					return res.status(403).json({"message":"user is not verified"});
 			}
@@ -83,13 +86,22 @@ exports.verifyemail = async (req,res) => {
 };	
 
 exports.requiresLogin = (req, res, next) => {
-  if (req.session && req.session.userId) {
-    return next();
-  } else {
-    var err = new Error('You must be logged in to view this page.');
-    err.status = 401;
-    return next(err);
-  }
+	if(!req.header('Authorization')) {
+		res.status(403).send({message:"You are not authorized to access the resource"});
+	}
+	
+	else {	
+	const token = req.header('Authorization').replace('Bearer ', '')
+	jwt.verify(token, process.env.JWT_KEY,function(err, payload) {
+		if(payload) {
+			req.payload=payload;
+			next();
+		}
+		else if(err){
+			res.sendStatus(403);
+		}
+	});
+	}	
 }
 
 exports.getUsers = (req,res) => {
