@@ -20,27 +20,32 @@ exports.signup = async (req, res) => {
     	.then(async function(hashed_password) {
 
         	const user = await new User({email,name,hashed_password});
-			user.emailVerificationToken = crypto.randomBytes(20).toString('hex');
-  			user.emailVerificationTokenExpires = Date.now() + 3600000*24; 
-        	await user.save(function(err) {
-			
-			if(!err) {	
-  				const resetURL = `http://${req.headers.host}/verifyemail/${user.emailVerificationToken}`;
-				const sgMail = require('@sendgrid/mail');
-				
-				sgMail.setApiKey(process.env.SENDGRID_API_KEY);	
-				const msg = {
-  					from: 'admin@pinclone.com',
-  					to: email,
-  					subject: 'Email verification link',
-  					html: `Verify your email <a href="${resetURL}">here</a> to login to your account`,
-				};
-				sgMail.send(msg);
-
-				return res.json({message:"verify email address to login"});	
-			} 
-				return res.status(500).send({ message: err.message });
+			await user.save(function(err){
+				if(!err)
+				res.send("User saved successfully");
 			});
+			
+			// user.emailVerificationToken = crypto.randomBytes(20).toString('hex');
+  			// user.emailVerificationTokenExpires = Date.now() + 3600000*24; 
+        	// await user.save(function(err) {
+			
+			// if(!err) {	
+  			// 	const resetURL = `http://${req.headers.host}/verifyemail/${user.emailVerificationToken}`;
+			// 	const sgMail = require('@sendgrid/mail');
+				
+			// 	sgMail.setApiKey(process.env.SENDGRID_API_KEY);	
+			// 	const msg = {
+  			// 		from: 'admin@pinclone.com',
+  			// 		to: email,
+  			// 		subject: 'Email verification link',
+  			// 		html: `Verify your email <a href="${resetURL}">here</a> to login to your account`,
+			// 	};
+			// 	sgMail.send(msg);
+
+			// 	return res.json({message:"verify email address to login"});	
+			// } 
+			// 	return res.status(500).send({ message: err.message });
+			// });
     	})
     	.catch(function(error){
         	res.status(500).send({message:error.message});
@@ -59,12 +64,14 @@ exports.login =  (req,res) => {
 
 		bcrypt.compare(password,user.hashed_password, async (err,result) => {
 			if(result) {
-				if(user.isVerified) {
+				// if(user.isVerified)
+				{
+
 					const token = await user.generateAuthToken();
 					return res.status(200).json({"message":"successfully logged in",token});
 				}
-				else
-					return res.status(403).json({"message":"user is not verified"});
+				// else
+				// 	return res.status(403).json({"message":"user is not verified"});
 			}
 			else return res.status(403).json({message: "email address password do not match"});
 		});
