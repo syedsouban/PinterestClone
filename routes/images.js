@@ -4,6 +4,8 @@ const User = require("../models/user");
 const Board = require("../models/board");
 const mongoose = require('mongoose');
 
+const FollowFollower =  require("../models/followfollower");
+
 const Pin = require("../models/pin");
 const { ObjectId } = mongoose.Types;
 
