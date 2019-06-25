@@ -16,8 +16,9 @@ const pinSchema = new mongoose.Schema({
     website: String,
     tags : [String],
     createdBy: { type: ObjectId, ref: 'User'},
+    boardId:{type: ObjectId, ref: 'Board'},
     createdAt: Date,
-    UpdatedAt: Date
+    updatedAt: Date
 });
 
 module.exports = mongoose.model("Pin", pinSchema);

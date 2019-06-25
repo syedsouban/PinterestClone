@@ -1,0 +1,18 @@
+    FollowFollower.find({follower:currentUserId,followee:toBeFollowedUserId},(err,followfollower) => {
+        if(err)
+            res.status(500).send(err)
+        if(followfollower) {
+            res.send("You are already following the user");
+        }
+        else {
+            const followfollowerObj = new FollowFollower({follower:currentUserId,followee:toBeFollowedUserId});
+            followfollowerObj.save((err,result)=>{
+                if(err)
+                    res.status(500).send(err);
+                if(result)
+                    res.send("Successfully saved user");
+                else if(!result)
+                    res.status(500).send("Unable to follow user");    
+            });
+        }
+    });

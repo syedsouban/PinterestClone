@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
+const Board = require("../models/board");
 const mongoose = require('mongoose');
 
 const Pin = require("../models/pin");
@@ -13,52 +14,17 @@ const {
 } = require("../handlers/auth");
 
 const {
-	uploadPin,getImageFeed
+	uploadPin,getImageFeed,updatePinDesc,deleteAPin,getPinsFromUserBoards
 } = require("../handlers/images");
 
-router.post('/uploadPin',requiresLogin,uploadPin);
+router.post('/uploadPin/:boardId',requiresLogin,uploadPin);
 
-router.get('/getImageFeed',requiresLogin,getImageFeed);
+router.post('/updatePinDesc/:pinId',requiresLogin,updatePinDesc);
 
-// router.get('')
-router.post('/tUpdatePinfeed',requiresLogin, function(req,res){
+router.post('/deleteAPin/:pinId',requiresLogin,deleteAPin);
 
-	const currentUserId = req.payload.user._id;
-	console.log(currentUserId);
-	var pinFeedArr=[];
-	User.find({},function(err,users){
-		// console.log(user[0]);
-		users.forEach(function(user){
-			if(user) {
-				const followers = user.followers;
-				
-				followers.forEach(function(follower){
-					Pin.find({createdBy:ObjectId(user._id)},function(err,pins){
-						console.log(pins);
-						pinFeedArr=[];
-						pins.forEach(pinn => {
+router.get('/getImageFeed/:pgno',requiresLogin,getImageFeed);
 
-							pinFeedArr.push({followedBy:ObjectId(follower._id),url:pinn.url,pin:pinn._id})
-						});
-						// console.log(pinFeedArr);
-						PinFeed.insertMany(pinFeedArr,function(err,pins){
-							if(!err)
-							console.log("pins")
-							else
-							console.log('err');  
-						});
-					});	
-				});
-				
-			}
-		})
-		
-		
-		
-			
-	});
+router.get('/getPinsFromUserBoards/:pgno',requiresLogin,getPinsFromUserBoards);
 
-	
-	
-});
 module.exports = router;
