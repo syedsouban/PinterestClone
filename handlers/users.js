@@ -3,6 +3,9 @@ const {
     requiresLogin
 } = require("../routes/auth");
 
+const mongoose = require('mongoose');
+const { ObjectId } = mongoose.Types;
+
 exports.follow = (req, res) => {
     const toBeFollowedUserId = req.params.userid;
     const currentUserId = req.payload.user._id;
@@ -67,4 +70,18 @@ exports.unfollow = (req,res) => {
             });
         }    
     });
+};
+
+exports.getFollowers = (req,res) => {
+    const currentUserId = req.payload.user._id;
+    console.log(currentUserId);
+    User.aggregate([
+        {$match: {_id: ObjectId(currentUserId)}},
+        {$unwind: "$followers"},
+        {"$group": {"_id": "$_id", "followers": {"$push": "$followers"}}}
+    ]).exec(function(err,followers){
+          if(!err) {
+              res.send(followers);
+          }
+      });
 };
